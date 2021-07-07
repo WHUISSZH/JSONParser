@@ -1,4 +1,4 @@
-package com.whuiss.JSONParser.Tokenizer;
+package com.whuiss.JSONParser.tokenizer;
 
 public enum TokenType {
     BEIGN_OBJECT(1),
@@ -8,8 +8,8 @@ public enum TokenType {
     NULL(16),
     NUMBER(32),
     STRING(64),
-    BOLLEAN(128),
-    SEP_COLMMA(256),
+    BOOLEAN(128),
+    SEP_COLON(256),
     SEP_COMMA(512),
     END_DOCUMENT(1024);
 

@@ -1,4 +1,4 @@
-package com.whuiss.JSONParser.Tokenizer;
+package com.whuiss.JSONParser.tokenizer;
 
 import java.io.IOException;
 import java.io.Reader;
