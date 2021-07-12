@@ -4,8 +4,6 @@ import com.whuiss.JSONParser.jsonParseException.JsonParseException;
 
 import java.io.IOException;
 
-import static com.sun.org.apache.xml.internal.utils.XMLCharacterRecognizer.isWhiteSpace;
-import static java.lang.Character.isDigit;
 
 /**
  * @author ：HuiZhang
@@ -50,7 +48,7 @@ public class Tokenizer {
 
         switch (ch) {
             case '{':
-                return new Token(TokenType.BEIGN_OBJECT, String.valueOf(ch));
+                return new Token(TokenType.BEGIN_OBJECT, String.valueOf(ch));
             case '}':
                 return new Token(TokenType.END_OBJECT, String.valueOf(ch));
             case '[':
@@ -61,6 +59,8 @@ public class Tokenizer {
                 return new Token(TokenType.SEP_COMMA, String.valueOf(ch));
             case ':':
                 return new Token(TokenType.SEP_COLON, String.valueOf(ch));
+            case 'n':
+                return readNull();
             case 't':
             case 'f':
                 return readBoolean();
@@ -70,7 +70,7 @@ public class Tokenizer {
                 return readNumber();
         }
 
-        if (isDigit(ch)){
+        if (isDigit(ch)) {
             return readNumber();
         }
 
@@ -79,13 +79,13 @@ public class Tokenizer {
 
     private Token readBoolean() throws IOException {
         if (charReader.getPosElemet() == 't') {
-            if (!(charReader.next() == 'r') && charReader.next() == 'u' && charReader.next() == 'e') {
+            if (!(charReader.next() == 'r' && charReader.next() == 'u' && charReader.next() == 'e')) {
                 throw new JsonParseException("Invalid json string");
             }
             return new Token(TokenType.BOOLEAN, "true");
         } else {
-            if (!(charReader.next() == 'a') && charReader.next() == 'l'
-                    && charReader.next() == 's' && charReader.next() == 'e') {
+            if (!(charReader.next() == 'a' && charReader.next() == 'l'
+                    && charReader.next() == 's' && charReader.next() == 'e')) {
                 throw new JsonParseException("Invalid json string");
             }
             return new Token(TokenType.BOOLEAN, "false");
@@ -103,7 +103,8 @@ public class Tokenizer {
                 stringBuilder.append('\\'); // 将特殊字符前的转义字符 \ 加入
                 next = charReader.getPosElemet();
                 stringBuilder.append(next);
-                // 判断 \u four-hex-digits 类型
+                // 判断
+                // '\ u' four-hex-digits 类型
                 if (next == 'u') {
                     for (int i = 0; i < 4; i++) {
                         next = charReader.next();
@@ -133,33 +134,42 @@ public class Tokenizer {
             if (ch == '0') { // 处理 0.XXXX
                 sb.append(ch);
                 sb.append(readFracAndExp());
-            }else if (isDigit(ch)){
+            } else if (isDigit(ch)) {
                 do {
                     sb.append(ch);
                     ch = charReader.next();
-                }while (isDigit(ch));
-                if (ch != (char)-1){
+                } while (isDigit(ch));
+                if (ch != (char) -1) {
                     charReader.back();
                     sb.append(readFracAndExp());
                 }
-            }else {
+            } else {
                 throw new JsonParseException("Invaild minus number");
             }
-        }else if (ch == '0'){ // 处理小数
+        } else if (ch == '0') { // 处理小数
             sb.append(ch);
             sb.append(readFracAndExp());
-        }else {
+        } else {
             do {
                 sb.append(ch);
                 ch = charReader.next();
-            }while (isDigit(ch));
-                if (ch != (char)-1){
-                    charReader.back();
-                    sb.append(readFracAndExp());
-                }
+            } while (isDigit(ch));
+            if (ch != (char) -1) {
+                charReader.back();
+                sb.append(readFracAndExp());
+            }
         }
         return new Token(TokenType.NUMBER, sb.toString());
     }
+
+    private Token readNull() throws IOException {
+        if (!(charReader.next() == 'u' && charReader.next() == 'l' && charReader.next() == 'l')) {
+            throw new JsonParseException("Invalid json string");
+        }
+
+        return new Token(TokenType.NULL, "null");
+    }
+
 
     /**
      * @return 判断是否是特殊类型字符
@@ -172,7 +182,6 @@ public class Tokenizer {
     }
 
     /**
-     *
      * @param ch
      * @return 判断是不是十六进制的 OX0000 - OXFFFF
      */
@@ -182,7 +191,6 @@ public class Tokenizer {
 
 
     /**
-     *
      * @return 读取小数点后部分 和 科学计数法
      * @throws IOException
      */
@@ -207,15 +215,15 @@ public class Tokenizer {
             if (isExp(ch)) {
                 sb.append(ch);
                 sb.append(readExp()); // 读取 e 后面的 +09
-            }else {
-                if (ch != (char)-1){
+            } else {
+                if (ch != (char) -1) {
                     charReader.back();
                 }
             }
-        }else if (isExp(ch)){ // 0.
+        } else if (isExp(ch)) { // 0.
             sb.append(ch);
             sb.append(readExp());
-        }else {
+        } else {
             charReader.back();
         }
         return sb.toString();
@@ -227,6 +235,7 @@ public class Tokenizer {
      * 1.03乘10的-9次方，可简写为“1.03E-09”的形式
      * -1.03乘10的-9次方，可简写为“-1.03E-09”的形式
      * 读取读取 e 后面的 +09
+     *
      * @return
      * @throws IOException
      */
@@ -241,7 +250,7 @@ public class Tokenizer {
                     sb.append(ch);
                     ch = charReader.next();
                 } while (isDigit(ch));
- // "salay": “1.03E+09” 读取完 9 后，pos 变量已经到了 “ 位置，再进行switch判断时，
+                // "salay": “1.03E+09” 读取完 9 后，pos 变量已经到了 “ 位置，再进行switch判断时，
                 if (ch != (char) -1) {
                     charReader.back();
                 }
@@ -257,10 +266,20 @@ public class Tokenizer {
 
     /**
      * 判断是不是科学计数法中的  e E
+     *
      * @param ch
      * @return
      */
     private boolean isExp(char ch) {
         return ch == 'e' || ch == 'E';
+    }
+
+
+    private boolean isWhiteSpace(char ch) {
+        return (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n');
+    }
+
+    private boolean isDigit(char ch) {
+        return ch >= '0' && ch <= '9';
     }
 }

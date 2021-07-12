@@ -18,7 +18,7 @@ import java.util.Map;
 public class JsonObject {
     private Map<String, Object> map = new HashMap<String, Object>();
 
-    private void put(String key, Object value) {
+    public void put(String key, Object value) {
         map.put(key, value);
     }
 

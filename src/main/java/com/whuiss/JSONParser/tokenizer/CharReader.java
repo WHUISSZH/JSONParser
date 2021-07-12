@@ -39,14 +39,14 @@ public class CharReader {
      * @throws IOException
      */
     public char next() throws IOException {
-        if (!hasNext()){
-            return (char)-1;
+        if (!hasNext()) {
+            return (char) -1;
         }
         return buffer[pos++];
     }
 
-    public boolean hasNext() throws IOException{
-        if (pos < size){
+    public boolean hasNext() throws IOException {
+        if (pos < size) {
             return true;
         }
         fillBuffer();
@@ -55,7 +55,7 @@ public class CharReader {
 
     private void fillBuffer() throws IOException {
         int n = reader.read(buffer);
-        if (n == -1){
+        if (n == -1) {
             return;
         }
 
@@ -64,7 +64,7 @@ public class CharReader {
     }
 
     // 回退
-    public void back(){
-        pos = Math.max(0,--pos);
+    public void back() {
+        pos = Math.max(0, --pos);
     }
 }
