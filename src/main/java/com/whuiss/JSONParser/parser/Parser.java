@@ -54,7 +54,7 @@ public class Parser {
         JsonObject jsonObject = new JsonObject();
         int exceptToken = STRING_TOKEN | END_OBJECT_TOKEN; // 保留了两个 token code 的信息; 给这样的初始化值是为了处理嵌套json
         String key = null;
-        Object value = null;
+        Object value;
         while (tokens.hasNext()) {
             Token token = tokens.next();
             TokenType tokenType = token.getTokenType();
@@ -114,12 +114,16 @@ public class Parser {
                         exceptToken = SEP_COLON_TOKEN;
                     }
                     break;
-                case SEP_COMMA:
+                case SEP_COLON:
                     checkException(tokenType, exceptToken);
                     exceptToken = NULL_TOKEN | NUMBER_TOKEN | BOOLEAN_TOKEN | STRING_TOKEN
                             | BEGIN_OBJECT_TOKEN | BEGIN_ARRAY_TOKEN;
                     break;
-                case SEP_COLON:
+                case SEP_COMMA:
+                    checkException(tokenType, exceptToken);
+                    exceptToken = STRING_TOKEN;
+                    break;
+                case END_DOCUMENT:
                     checkException(tokenType, exceptToken);
                     return jsonObject;
                 default:
@@ -130,6 +134,7 @@ public class Parser {
 
         throw new JsonParseException("Parse error, invalid Token.");
     }
+
 
     private JsonArray parseJsonArray() {
         int exceptToken = BEGIN_ARRAY_TOKEN | END_ARRAY_TOKEN | BEGIN_OBJECT_TOKEN | NULL_TOKEN

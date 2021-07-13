@@ -1,7 +1,7 @@
 package com.whuiss.JSONParser.tokenizer;
 
 public enum TokenType {
-    BEIGN_OBJECT(1),
+    BEGIN_OBJECT(1),
     END_OBJECT(2),
     BEGIN_ARRAY(4),
     END_ARRAY(8),
